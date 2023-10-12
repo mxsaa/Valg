@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
-using System.Data.SqlClient;
 using System.Data;
-using System.Linq;
+using System.Data.SqlClient;
 using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
 
 namespace ValgSystem
 {
@@ -14,17 +10,23 @@ namespace ValgSystem
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            BindDropDownListParti();
+            if (!IsPostBack)
+            {
+                // Bind both the DropDownList controls on the initial page load.
+                BindDropDownListParti();
+                BindDropDownListKommune();
+            }
         }
 
-        private void BindDropDownListParti()//dette blir en select *. det som returneres skal bindes til dropdown 
+        private void BindDropDownListParti()
         {
+            // Bind parti DropDownList.
             var connectionString = ConfigurationManager.ConnectionStrings["ConnCms"].ConnectionString;
             DataTable dt = new DataTable();
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
-                SqlCommand cmd = new SqlCommand("SELECT * from Parti", conn);//@ betyr at det er et parameter
+                SqlCommand cmd = new SqlCommand("SELECT * FROM Parti", conn);
                 cmd.CommandType = CommandType.Text;
                 SqlDataReader reader = cmd.ExecuteReader();
                 dt.Load(reader);
@@ -32,44 +34,96 @@ namespace ValgSystem
                 conn.Close();
             }
 
-            //loope gjennom datatable for å hente ut partinavn. lage et dropdownitem og putte navnet i det
-            foreach (DataRow row in dt.Rows)
-            {
-                ListItem item = new ListItem(row["Parti"].ToString(), row["Pid"].ToString());//hente ut verdier
-                DropDownListParti.Items.Add(item);//legge item i lista
-            }
-
-            //DropDownListParti.DataSource= dt;
+            DropDownListParti.DataSource = dt;
+            DropDownListParti.DataTextField = "PartiName"; // parti Navn
+            DropDownListParti.DataValueField = "Pid"; // partiID
             DropDownListParti.DataBind();
         }
 
-        protected void ButtonVote_Click(object sender, EventArgs e)
+        private void BindDropDownListKommune()
         {
-            SqlParameter param;
+            // Kommune DropDownList.
             var connectionString = ConfigurationManager.ConnectionStrings["ConnCms"].ConnectionString;
             DataTable dt = new DataTable();
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
-
-                SqlCommand cmd = new SqlCommand("INSERT INTO Vote (Kid,Pid) Values(@kid,@pid)", conn);//@ betyr at det er et parameter
+                SqlCommand cmd = new SqlCommand("SELECT * FROM Kommune", conn);
                 cmd.CommandType = CommandType.Text;
-
-                param=new SqlParameter("@kid",SqlDbType.Int);
-                param.Value = 1; //hardcode verdien til Fredrikstad. Denne må endres om det kan velges kommune fra en liste
-                cmd.Parameters.Add(param);
-
-                param = new SqlParameter("@pid", SqlDbType.Int);
-                param.Value = int.Parse(DropDownListParti.SelectedValue);//her har rekkefølgen på lista no e å si
-                cmd.Parameters.Add(param);
-
-                //SqlDataReader reader = cmd.ExecuteReader();
-                cmd.ExecuteNonQuery();
-                //dt.Load(reader);
-                //reader.Close();
+                SqlDataReader reader = cmd.ExecuteReader();
+                dt.Load(reader);
+                reader.Close();
                 conn.Close();
             }
-            
+
+            DropDownListKommune.DataSource = dt;
+            DropDownListKommune.DataTextField = "Navn"; // vis kommune navn
+            DropDownListKommune.DataValueField = "kommuneID"; // kommuneID
+            DropDownListKommune.DataBind();
+        }
+
+        protected void ButtonVote_Click(object sender, EventArgs e)
+        {
+            string userIp = GetClientIpAddress();
+
+            if (!HasUserVoted(userIp))
+            {
+                var connectionString = ConfigurationManager.ConnectionStrings["ConnCms"].ConnectionString;
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand("INSERT INTO UserVote (Pid, Kid, UserIp, VoteDateTime) VALUES (@pid, @kid, @userIp, GETDATE())", conn);
+                    cmd.CommandType = CommandType.Text;
+
+                    SqlParameter param = new SqlParameter("@pid", SqlDbType.Int);
+                    param.Value = int.Parse(DropDownKommune.SelectedValue);
+                    cmd.Parameters.Add(param);
+
+                    param = new SqlParameter("@kid", SqlDbType.Int);
+                    param.Value = int.Parse(DropDownListParti.SelectedValue);
+                    cmd.Parameters.Add(param);
+
+                    param = new SqlParameter("@userIp", SqlDbType.NVarChar, 255);
+                    param.Value = userIp;
+                    cmd.Parameters.Add(param);
+
+                    cmd.ExecuteNonQuery();
+                    conn.Close();
+                }
+            }
+            else
+            {
+                // User has already voted, show an error message or redirect as needed.
+            }
+        }
+
+        private string GetClientIpAddress()
+        {
+            // Get the user's IP address
+            string userIp = HttpContext.Current.Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
+            if (string.IsNullOrEmpty(userIp))
+                userIp = HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"];
+            return userIp;
+        }
+
+        private bool HasUserVoted(string userIp)
+        {
+            var connectionString = ConfigurationManager.ConnectionStrings["ConnCms"].ConnectionString;
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM UserVote WHERE UserIp = @userIp", conn);
+                cmd.CommandType = CommandType.Text;
+
+                SqlParameter param = new SqlParameter("@userIp", SqlDbType.NVarChar, 255);
+                param.Value = userIp;
+                cmd.Parameters.Add(param);
+
+                int voteCount = (int)cmd.ExecuteScalar();
+                conn.Close();
+
+                return voteCount > 0;
+            }
         }
     }
 }

@@ -1,31 +1,39 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Vote.aspx.cs" Inherits="ValgSystem.Vote" %>
+﻿
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Vote.aspx.cs" Inherits="ValgSystem.Vote" %>
 
 <!DOCTYPE html>
-
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 <head runat="server">
-    <title></title>
-    <style type="text/css">
-        .auto-style1 {
-            width: 538px;
-            height: 500px;
-        }
-    </style>
+    <title>Voting System</title>
 </head>
 <body>
     <form id="form1" runat="server">
         <div>
-            <asp:DropDownList ID="DropDownListParti" runat="server">
-                <asp:ListItem Selected="True" Value="0">Velg Party</asp:ListItem>
-                <asp:ListItem Value="1">H</asp:ListItem>
-                <asp:ListItem Value="2">Pp</asp:ListItem>
-            </asp:DropDownList>
-            <br /><br />
+            <h1>Stem på ett parti.</h1>
+
+            <asp:Label ID="LabelParti" runat="server" Text="Velg ett parti:"></asp:Label>
+            <asp:DropDownList ID="DropDownListParti" runat="server"></asp:DropDownList>
+
+            <br />
+
+            <asp:Label ID="LabelKommune" runat="server" Text="Velg en kommune:"></asp:Label>
+            <asp:DropDownList ID="DropDownKommune" runat="server"></asp:DropDownList>
+
+            <br />
+
             <asp:Button ID="ButtonVote" runat="server" Text="Stem" OnClick="ButtonVote_Click" />
+
             <br />
-            <br />
-            Flere features som kan legges til, for høyere score. Jo flere, bedre er det:<br />
-            <br />
+
+            <asp:Label ID="LabelMessage" runat="server" Text=""></asp:Label>
+        </div>
+    </form>
+</body>
+</html>
+
+
+
+
             Del 1 - Å stemme, som i denne formen<br />
             - Kan kun stemme en gang<br />
             - Dropdown med kommune<br />

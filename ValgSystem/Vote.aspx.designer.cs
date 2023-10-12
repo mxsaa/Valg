@@ -24,6 +24,15 @@ namespace ValgSystem
         protected global::System.Web.UI.HtmlControls.HtmlForm form1;
 
         /// <summary>
+        /// LabelParti control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label LabelParti;
+
+        /// <summary>
         /// DropDownListParti control.
         /// </summary>
         /// <remarks>
@@ -33,6 +42,24 @@ namespace ValgSystem
         protected global::System.Web.UI.WebControls.DropDownList DropDownListParti;
 
         /// <summary>
+        /// LabelKommune control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label LabelKommune;
+
+        /// <summary>
+        /// DropDownKommune control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList DropDownKommune;
+
+        /// <summary>
         /// ButtonVote control.
         /// </summary>
         /// <remarks>
@@ -40,5 +67,14 @@ namespace ValgSystem
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button ButtonVote;
+
+        /// <summary>
+        /// LabelMessage control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label LabelMessage;
     }
 }
